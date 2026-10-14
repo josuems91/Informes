@@ -5,11 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Carga de Informes D2</title>
 
-  <!-- Iconos globales para Android y iOS -->
+  <!-- Vincular el manifiesto PWA -->
+  <link rel="manifest" href="manifest.json">
+
+  <!-- Iconos oficial para el navegador y accesos directos -->
   <link rel="icon" type="image/png" href="https://lh3.googleusercontent.com/d/1OL4fcqW6-tv4hJ5PSO7fMdtME0pOF1nU">
   <link rel="apple-touch-icon" href="https://lh3.googleusercontent.com/d/1OL4fcqW6-tv4hJ5PSO7fMdtME0pOF1nU">
 
-  <!-- Configuración App Móvil -->
+  <!-- Configuración de pantalla completa -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="theme-color" content="#1a365d">
@@ -31,7 +34,15 @@
   </style>
 </head>
 <body>
-  <!-- REEMPLAZA LA URL DE ABAJO POR TU ENLACE REAL DE APPS SCRIPT (.../exec) -->
-  <iframe src="https://script.google.com/macros/s/AKfycbyla23f7O9c7SRzkouNEuTeKS-zzxksM0Nn7nkeZVcZ7mQ_GNOpRrPAU-ckQBKRjcdG/exec"></iframe>
+
+  <!-- Reemplaza la URL de abajo por tu enlace ejecutable real de Apps Script (.../exec) -->
+  <iframe src="https://script.google.com/macros/s/TU_ID_AQUI/exec"></iframe>
+
+  <!-- Registro del Service Worker para habilitar la instalación -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js');
+    }
+  </script>
 </body>
 </html>
