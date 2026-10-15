@@ -136,7 +136,7 @@
       const viejoScript = document.getElementById('jsonp-script-temp');
       if (viejoScript) viejoScript.remove();
 
-      // Inyección JSONP para saltar restricciones CORS de navegadores móviles
+      // Inyección JSONP para saltar restricciones CORS
       const script = document.createElement('script');
       script.id = 'jsonp-script-temp';
       script.src = `${SCRIPT_URL}?correo=${encodeURIComponent(correo)}&pass=${encodeURIComponent(pass)}&callback=procesarRespuestaServidor`;
@@ -144,7 +144,7 @@
       script.onerror = function() {
         btn.disabled = false;
         btn.innerText = "Ingresar / Validar Perfil";
-        mostrarMensaje("No se pudo conectar con el servidor. Revisa el despliegue de Apps Script.", "bg-red-100 text-red-700");
+        mostrarMensaje("No se pudo conectar con el servidor. Revisa la conexión.", "bg-red-100 text-red-700");
       };
 
       document.body.appendChild(script);
