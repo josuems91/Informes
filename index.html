@@ -3,90 +3,300 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Distrito 2 - Ingreso</title>
-
-  <link rel="apple-touch-icon" href="https://lh3.googleusercontent.com/d/1OL4fcqW6-tv4hJ5PSO7fMdtME0pOF1nU">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="theme-color" content="#1a365d">
-  <link rel="manifest" href="manifest.json">
-
+  <title>Distrito 2 - Costa Rica</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  
   <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      width: 100%;
-      height: 100%;
-      background-color: #f3f4f6;
-    }
+    body { background-color: #f8fafc; }
   </style>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-center p-2 sm:p-4">
+<body class="min-h-screen flex flex-col items-center justify-center p-3">
 
-  <!-- Card Principal de Validación -->
-  <div id="card-validacion" class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 border border-gray-200 my-auto">
+  <div class="bg-white rounded-2xl shadow-lg w-full max-w-md p-5 border border-gray-100 my-4">
     
-    <div class="text-center mb-6">
+    <!-- Encabezado con Logo -->
+    <div class="text-center mb-5">
       <img src="https://lh3.googleusercontent.com/d/1OL4fcqW6-tv4hJ5PSO7fMdtME0pOF1nU" alt="Escudo D2" class="w-20 h-20 mx-auto mb-2 object-contain">
-      <h1 class="text-xl font-bold text-blue-900">Distrito 2 - Costa Rica</h1>
-      <p class="text-xs text-gray-500">Validación de Perfil Ministerial</p>
+      <h1 class="text-2xl font-bold text-blue-900">Distrito 2 - Costa Rica</h1>
+      <p class="text-xs text-gray-500">Asistencia Administrativa y Recepción Documental</p>
     </div>
 
-    <!-- Módulo de Login -->
-    <div class="space-y-4">
-      <div>
-        <label class="block text-xs font-bold text-gray-700 mb-1">Correo Institucional</label>
-        <input type="email" id="input-correo" placeholder="ejemplo@lldm.org" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm text-gray-800">
-      </div>
-
-      <div>
-        <label class="block text-xs font-bold text-gray-700 mb-1">Contraseña</label>
-        <input type="password" id="input-pass" placeholder="••••••••" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm text-gray-800">
-      </div>
+    <!-- ========================================== -->
+    <!-- VISTA 1: FORMULARIO DE INICIO DE SESIÓN -->
+    <!-- ========================================== -->
+    <div id="vista-login" class="space-y-4">
+      <h2 class="text-sm font-bold text-gray-700 text-center uppercase tracking-wide border-b pb-2">Acceso de Ministros</h2>
       
-      <button onclick="validarEIngresar()" id="btn-validar" class="w-full bg-blue-900 hover:bg-blue-800 text-white font-semibold py-2.5 rounded-lg transition duration-200 shadow-md">
-        Ingresar / Validar Perfil
-      </button>
+      <form id="form-login" onsubmit="ejecutarLogin(event)" class="space-y-3">
+        <div>
+          <label class="block text-xs font-bold text-gray-700 mb-1">Correo Electrónico:</label>
+          <input type="email" id="login-correo" required placeholder="ejemplo@lldm.org" class="w-full px-3 py-2.5 border rounded-xl focus:ring-2 focus:ring-blue-500 text-sm text-gray-800 bg-white">
+        </div>
 
-      <div id="mensaje-estado" class="text-xs text-center hidden p-2 rounded-lg font-medium"></div>
+        <div>
+          <label class="block text-xs font-bold text-gray-700 mb-1">Contraseña:</label>
+          <input type="password" id="login-pass" required placeholder="••••••••" class="w-full px-3 py-2.5 border rounded-xl focus:ring-2 focus:ring-blue-500 text-sm text-gray-800 bg-white">
+        </div>
+
+        <button type="submit" id="btn-login" class="w-full bg-blue-800 hover:bg-blue-900 text-white font-bold py-3 rounded-xl transition duration-200 shadow-md mt-2">
+          Ingresar al Sistema
+        </button>
+      </form>
+
+      <div id="msg-login" class="text-xs text-center hidden p-3 rounded-xl font-medium"></div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- VISTA 2: FORMULARIO DE INFORME (OCULTO INICIALMENTE) -->
+    <!-- ========================================== -->
+    <div id="vista-formulario" class="hidden space-y-4">
+      
+      <!-- Pestañas de Navegación -->
+      <div class="flex justify-between bg-blue-50/60 p-1.5 rounded-xl text-xs font-semibold text-blue-800 text-center">
+        <div class="flex-1 py-1.5 bg-white rounded-lg shadow-sm border border-blue-100">1. Iglesia</div>
+        <div class="flex-1 py-1.5">2. Actividad</div>
+        <div class="flex-1 py-1.5">3. Archivos</div>
+      </div>
+
+      <form id="formulario-informe" onsubmit="enviarFormulario(event)" class="space-y-4">
+        
+        <!-- 1. Iglesia / Localidad -->
+        <div>
+          <label class="block text-xs font-bold text-gray-700 mb-1">1. Iglesia / Localidad:</label>
+          <input type="text" id="iglesia" name="iglesia" class="w-full px-3 py-2.5 border rounded-xl bg-gray-100 font-semibold text-sm text-blue-900" readonly required>
+        </div>
+
+        <!-- 2. Mes y Año correspondiente -->
+        <div>
+          <label class="block text-xs font-bold text-gray-700 mb-1">2. Mes y Año correspondiente:</label>
+          <select id="mes" name="mes" class="w-full px-3 py-2.5 border rounded-xl focus:ring-2 focus:ring-blue-500 text-sm text-gray-800 bg-white" required>
+            <option value="">Buscando carpetas en Drive...</option>
+          </select>
+        </div>
+
+        <!-- 3. Fecha del Evento -->
+        <div>
+          <label class="block text-xs font-bold text-gray-700 mb-1">3. Fecha del Evento:</label>
+          <input type="date" id="fechaEvento" name="fechaEvento" class="w-full px-3 py-2.5 border rounded-xl focus:ring-2 focus:ring-blue-500 text-sm text-gray-800 bg-white" required>
+        </div>
+
+        <!-- 4. Tipo de Actividad -->
+        <div>
+          <label class="block text-xs font-bold text-gray-700 mb-1">4. Tipo de Actividad:</label>
+          <input type="text" id="nombreActividad" name="nombreActividad" placeholder="Ej. Dominical, Coros, Confraternidad" class="w-full px-3 py-2.5 border rounded-xl focus:ring-2 focus:ring-blue-500 text-sm text-gray-800 bg-white" required>
+        </div>
+
+        <div class="bg-blue-50 p-2 rounded-lg flex items-center gap-2 border-l-4 border-blue-600 my-2">
+          <span class="text-base">📄</span>
+          <span class="text-xs font-semibold text-blue-900">Documento / Informe Escrito</span>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-gray-600 mb-1">Adjuntar Informe (PDF, Word, Excel):</label>
+          <input type="file" id="archivosDoc" multiple accept=".pdf,.doc,.docx,.xls,.xlsx" class="w-full text-xs text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200">
+        </div>
+
+        <div class="bg-blue-50 p-2 rounded-lg flex items-center gap-2 border-l-4 border-blue-600 my-2">
+          <span class="text-base">📷</span>
+          <span class="text-xs font-semibold text-blue-900">Fotografías / Evidencias</span>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-gray-600 mb-1">Adjuntar Fotos (Puedes varias):</label>
+          <input type="file" id="archivosFotos" multiple accept="image/*" class="w-full text-xs text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200">
+        </div>
+
+        <button type="submit" id="btn-enviar" class="w-full bg-blue-700 hover:bg-blue-800 text-white font-bold py-3 rounded-xl transition duration-200 shadow-md mt-4">
+          Enviar Paquete Completo
+        </button>
+
+        <div id="estado-envio" class="text-xs text-center hidden p-3 rounded-xl font-medium"></div>
+
+      </form>
     </div>
 
   </div>
 
   <script>
-    // URL sincronizada con el despliegue activo en Google Apps Script
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw7v-iU0tCN2YHwBzMCNAX_vZEbTZMgDktYeBc7Nkzd9Ahu-FLSszSKsT9FzSKDEQMC/exec";
+    // URL Web App de tu proyecto en Google Apps Script
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzO3lS3X_C0c4kG24r6mFmsRsn23aIomzMvdYjT-5o8_v-o10HlU0_mRjH-iZ09T-s/exec";
 
-    function validarEIngresar() {
-      const correo = document.getElementById('input-correo').value.trim();
-      const pass = document.getElementById('input-pass').value.trim();
+    const NOMBRES_MESES = [
+      "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+      "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+    ];
 
-      if (!correo || !pass) {
-        mostrarMensaje("Por favor ingresa tu correo y contraseña.", "bg-red-100 text-red-700");
-        return;
+    // ==========================================
+    // INICIO DE SESIÓN EN SEGUNDO PLANO (AJAX/FETCH)
+    // ==========================================
+    function ejecutarLogin(e) {
+      e.preventDefault();
+      const correo = document.getElementById('login-correo').value.trim();
+      const pass = document.getElementById('login-pass').value.trim();
+      const btn = document.getElementById('btn-login');
+      const msg = document.getElementById('msg-login');
+
+      btn.disabled = true;
+      btn.innerText = "Verificando credenciales...";
+      msg.className = "text-xs text-center p-3 rounded-xl font-medium bg-blue-100 text-blue-800 block";
+      msg.innerText = "Consultando directorio...";
+
+      const url = `${WEB_APP_URL}?action=login&correo=${encodeURIComponent(correo)}&pass=${encodeURIComponent(pass)}`;
+
+      fetch(url)
+        .then(res => res.json())
+        .then(data => {
+          btn.disabled = false;
+          btn.innerText = "Ingresar al Sistema";
+
+          if (data.exito) {
+            msg.className = "hidden";
+            // Transición suave: ocultar Login y mostrar Formulario
+            document.getElementById('vista-login').classList.add('hidden');
+            document.getElementById('vista-formulario').classList.remove('hidden');
+            
+            inicializarFormulario(data.iglesia);
+          } else {
+            msg.className = "text-xs text-center p-3 rounded-xl font-medium bg-red-100 text-red-800 block";
+            msg.innerText = data.mensaje || "Credenciales incorrectas.";
+          }
+        })
+        .catch(err => {
+          btn.disabled = false;
+          btn.innerText = "Ingresar al Sistema";
+          msg.className = "text-xs text-center p-3 rounded-xl font-medium bg-red-100 text-red-800 block";
+          msg.innerText = "Error al conectar con la base de datos.";
+        });
+    }
+
+    // ==========================================
+    // CARGAR DATOS INICIALES Y CARPETAS DE DRIVE
+    // ==========================================
+    function inicializarFormulario(nombreIglesia) {
+      document.getElementById('iglesia').value = nombreIglesia;
+
+      const hoy = new Date();
+      document.getElementById('fechaEvento').value = hoy.toISOString().split('T')[0];
+
+      const mesActualNombre = NOMBRES_MESES[hoy.getMonth()];
+      const anioActual = hoy.getFullYear();
+      const etiquetaMesActual = `${mesActualNombre} ${anioActual}`;
+
+      const url = `${WEB_APP_URL}?action=getCarpetas&iglesia=${encodeURIComponent(nombreIglesia)}`;
+
+      fetch(url)
+        .then(res => res.json())
+        .then(data => {
+          const selectMes = document.getElementById('mes');
+          selectMes.innerHTML = '';
+
+          if (data.exito && data.carpetas && data.carpetas.length > 0) {
+            selectMes.innerHTML = '<option value="">-- Selecciona la carpeta de periodo --</option>';
+            let indexSeleccionado = -1;
+
+            data.carpetas.forEach((item, index) => {
+              const opt = document.createElement('option');
+              opt.value = item.nombreReal;
+              opt.innerText = item.nombreLimpio;
+
+              if (item.nombreLimpio.toLowerCase() === etiquetaMesActual.toLowerCase()) {
+                indexSeleccionado = index;
+              }
+
+              selectMes.appendChild(opt);
+            });
+
+            if (indexSeleccionado !== -1) {
+              selectMes.selectedIndex = indexSeleccionado + 1;
+            } else {
+              selectMes.selectedIndex = 1;
+            }
+          } else {
+            selectMes.innerHTML = '<option value="">No se encontraron carpetas en Drive para esta iglesia</option>';
+          }
+        })
+        .catch(err => {
+          document.getElementById('mes').innerHTML = '<option value="">Error al obtener carpetas de Drive</option>';
+        });
+    }
+
+    // ==========================================
+    // ENVIAR ARCHIVOS A GOOGLE DRIVE SIN SALIR DE GITHUB
+    // ==========================================
+    function enviarFormulario(e) {
+      e.preventDefault();
+      const btn = document.getElementById('btn-enviar');
+      const msg = document.getElementById('estado-envio');
+
+      btn.disabled = true;
+      btn.innerText = "Procesando y guardando...";
+      msg.className = "text-xs text-center p-3 rounded-xl font-medium bg-blue-100 text-blue-800 block";
+      msg.innerText = "Guardando archivos en Google Drive...";
+
+      const datosForm = {
+        iglesia: document.getElementById('iglesia').value,
+        mes: document.getElementById('mes').value,
+        fechaEvento: document.getElementById('fechaEvento').value,
+        nombreActividad: document.getElementById('nombreActividad').value
+      };
+
+      const filesDoc = document.getElementById('archivosDoc').files;
+      const filesFotos = document.getElementById('archivosFotos').files;
+
+      Promise.all([
+        convertirArchivosBase64(filesDoc),
+        convertirArchivosBase64(filesFotos)
+      ]).then(([docs, fotos]) => {
+        const payload = {
+          datosFormulario: datosForm,
+          documentos: docs,
+          fotos: fotos
+        };
+
+        fetch(WEB_APP_URL, {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        })
+        .then(res => res.json())
+        .then(data => {
+          btn.disabled = false;
+          btn.innerText = "Enviar Paquete Completo";
+
+          if (data.exito) {
+            msg.className = "text-xs text-center p-3 rounded-xl font-medium bg-green-100 text-green-800 block";
+            msg.innerText = data.mensaje;
+            document.getElementById('archivosDoc').value = '';
+            document.getElementById('archivosFotos').value = '';
+            document.getElementById('nombreActividad').value = '';
+          } else {
+            msg.className = "text-xs text-center p-3 rounded-xl font-medium bg-red-100 text-red-800 block";
+            msg.innerText = "Error: " + data.mensaje;
+          }
+        })
+        .catch(err => {
+          btn.disabled = false;
+          btn.innerText = "Enviar Paquete Completo";
+          msg.className = "text-xs text-center p-3 rounded-xl font-medium bg-red-100 text-red-800 block";
+          msg.innerText = "Error de red al guardar los archivos.";
+        });
+      });
+    }
+
+    function convertirArchivosBase64(files) {
+      const promesas = [];
+      for (let i = 0; i < files.length; i++) {
+        promesas.push(new Promise(resolve => {
+          const reader = new FileReader();
+          reader.onload = e => {
+            resolve({
+              nombre: files[i].name,
+              mimeType: files[i].type,
+              base64: e.target.result.split(',')[1]
+            });
+          };
+          reader.readAsDataURL(files[i]);
+        }));
       }
-
-      mostrarMensaje("Ingresando y verificando perfil...", "bg-blue-100 text-blue-800");
-
-      // Redirección directa incluyendo el parámetro authuser=0 para evitar bloqueos de sesión multicuenta
-      const urlDestino = `${SCRIPT_URL}?correo=${encodeURIComponent(correo)}&pass=${encodeURIComponent(pass)}&authuser=0`;
-      
-      setTimeout(() => {
-        window.location.href = urlDestino;
-      }, 300);
-    }
-
-    function mostrarMensaje(texto, clases) {
-      const msg = document.getElementById('mensaje-estado');
-      msg.className = `text-xs text-center p-2 rounded-lg ${clases}`;
-      msg.innerText = texto;
-      msg.classList.remove('hidden');
-    }
-
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw.js');
+      return Promise.all(promesas);
     }
   </script>
 </body>
