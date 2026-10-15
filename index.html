@@ -26,6 +26,7 @@
     <div id="vista-login" class="space-y-4">
       <h2 class="text-sm font-bold text-gray-700 text-center uppercase tracking-wide border-b pb-2">Acceso de Ministros</h2>
       
+      <!-- FORMULARIO SIN ACTION PARA EVITAR REDIRECCIÓN -->
       <form id="form-login" onsubmit="ejecutarLogin(event)" class="space-y-3">
         <div>
           <label class="block text-xs font-bold text-gray-700 mb-1">Correo Electrónico:</label>
@@ -57,6 +58,7 @@
         <div class="flex-1 py-1.5">3. Archivos</div>
       </div>
 
+      <!-- FORMULARIO SIN ACTION PARA PROCESAR CON FETCH -->
       <form id="formulario-informe" onsubmit="enviarFormulario(event)" class="space-y-4">
         
         <!-- 1. Iglesia / Localidad -->
@@ -117,187 +119,6 @@
   </div>
 
   <script>
-    // URL Web App de tu proyecto en Google Apps Script
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzO3lS3X_C0c4kG24r6mFmsRsn23aIomzMvdYjT-5o8_v-o10HlU0_mRjH-iZ09T-s/exec";
 
-    const NOMBRES_MESES = [
-      "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
-      "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
-    ];
-
-    // ==========================================
-    // INICIO DE SESIÓN EN SEGUNDO PLANO (AJAX/FETCH)
-    // ==========================================
-    function ejecutarLogin(e) {
-      e.preventDefault();
-      const correo = document.getElementById('login-correo').value.trim();
-      const pass = document.getElementById('login-pass').value.trim();
-      const btn = document.getElementById('btn-login');
-      const msg = document.getElementById('msg-login');
-
-      btn.disabled = true;
-      btn.innerText = "Verificando credenciales...";
-      msg.className = "text-xs text-center p-3 rounded-xl font-medium bg-blue-100 text-blue-800 block";
-      msg.innerText = "Consultando directorio...";
-
-      const url = `${WEB_APP_URL}?action=login&correo=${encodeURIComponent(correo)}&pass=${encodeURIComponent(pass)}`;
-
-      fetch(url)
-        .then(res => res.json())
-        .then(data => {
-          btn.disabled = false;
-          btn.innerText = "Ingresar al Sistema";
-
-          if (data.exito) {
-            msg.className = "hidden";
-            // Transición suave: ocultar Login y mostrar Formulario
-            document.getElementById('vista-login').classList.add('hidden');
-            document.getElementById('vista-formulario').classList.remove('hidden');
-            
-            inicializarFormulario(data.iglesia);
-          } else {
-            msg.className = "text-xs text-center p-3 rounded-xl font-medium bg-red-100 text-red-800 block";
-            msg.innerText = data.mensaje || "Credenciales incorrectas.";
-          }
-        })
-        .catch(err => {
-          btn.disabled = false;
-          btn.innerText = "Ingresar al Sistema";
-          msg.className = "text-xs text-center p-3 rounded-xl font-medium bg-red-100 text-red-800 block";
-          msg.innerText = "Error al conectar con la base de datos.";
-        });
-    }
-
-    // ==========================================
-    // CARGAR DATOS INICIALES Y CARPETAS DE DRIVE
-    // ==========================================
-    function inicializarFormulario(nombreIglesia) {
-      document.getElementById('iglesia').value = nombreIglesia;
-
-      const hoy = new Date();
-      document.getElementById('fechaEvento').value = hoy.toISOString().split('T')[0];
-
-      const mesActualNombre = NOMBRES_MESES[hoy.getMonth()];
-      const anioActual = hoy.getFullYear();
-      const etiquetaMesActual = `${mesActualNombre} ${anioActual}`;
-
-      const url = `${WEB_APP_URL}?action=getCarpetas&iglesia=${encodeURIComponent(nombreIglesia)}`;
-
-      fetch(url)
-        .then(res => res.json())
-        .then(data => {
-          const selectMes = document.getElementById('mes');
-          selectMes.innerHTML = '';
-
-          if (data.exito && data.carpetas && data.carpetas.length > 0) {
-            selectMes.innerHTML = '<option value="">-- Selecciona la carpeta de periodo --</option>';
-            let indexSeleccionado = -1;
-
-            data.carpetas.forEach((item, index) => {
-              const opt = document.createElement('option');
-              opt.value = item.nombreReal;
-              opt.innerText = item.nombreLimpio;
-
-              if (item.nombreLimpio.toLowerCase() === etiquetaMesActual.toLowerCase()) {
-                indexSeleccionado = index;
-              }
-
-              selectMes.appendChild(opt);
-            });
-
-            if (indexSeleccionado !== -1) {
-              selectMes.selectedIndex = indexSeleccionado + 1;
-            } else {
-              selectMes.selectedIndex = 1;
-            }
-          } else {
-            selectMes.innerHTML = '<option value="">No se encontraron carpetas en Drive para esta iglesia</option>';
-          }
-        })
-        .catch(err => {
-          document.getElementById('mes').innerHTML = '<option value="">Error al obtener carpetas de Drive</option>';
-        });
-    }
-
-    // ==========================================
-    // ENVIAR ARCHIVOS A GOOGLE DRIVE SIN SALIR DE GITHUB
-    // ==========================================
-    function enviarFormulario(e) {
-      e.preventDefault();
-      const btn = document.getElementById('btn-enviar');
-      const msg = document.getElementById('estado-envio');
-
-      btn.disabled = true;
-      btn.innerText = "Procesando y guardando...";
-      msg.className = "text-xs text-center p-3 rounded-xl font-medium bg-blue-100 text-blue-800 block";
-      msg.innerText = "Guardando archivos en Google Drive...";
-
-      const datosForm = {
-        iglesia: document.getElementById('iglesia').value,
-        mes: document.getElementById('mes').value,
-        fechaEvento: document.getElementById('fechaEvento').value,
-        nombreActividad: document.getElementById('nombreActividad').value
-      };
-
-      const filesDoc = document.getElementById('archivosDoc').files;
-      const filesFotos = document.getElementById('archivosFotos').files;
-
-      Promise.all([
-        convertirArchivosBase64(filesDoc),
-        convertirArchivosBase64(filesFotos)
-      ]).then(([docs, fotos]) => {
-        const payload = {
-          datosFormulario: datosForm,
-          documentos: docs,
-          fotos: fotos
-        };
-
-        fetch(WEB_APP_URL, {
-          method: 'POST',
-          body: JSON.stringify(payload)
-        })
-        .then(res => res.json())
-        .then(data => {
-          btn.disabled = false;
-          btn.innerText = "Enviar Paquete Completo";
-
-          if (data.exito) {
-            msg.className = "text-xs text-center p-3 rounded-xl font-medium bg-green-100 text-green-800 block";
-            msg.innerText = data.mensaje;
-            document.getElementById('archivosDoc').value = '';
-            document.getElementById('archivosFotos').value = '';
-            document.getElementById('nombreActividad').value = '';
-          } else {
-            msg.className = "text-xs text-center p-3 rounded-xl font-medium bg-red-100 text-red-800 block";
-            msg.innerText = "Error: " + data.mensaje;
-          }
-        })
-        .catch(err => {
-          btn.disabled = false;
-          btn.innerText = "Enviar Paquete Completo";
-          msg.className = "text-xs text-center p-3 rounded-xl font-medium bg-red-100 text-red-800 block";
-          msg.innerText = "Error de red al guardar los archivos.";
-        });
-      });
-    }
-
-    function convertirArchivosBase64(files) {
-      const promesas = [];
-      for (let i = 0; i < files.length; i++) {
-        promesas.push(new Promise(resolve => {
-          const reader = new FileReader();
-          reader.onload = e => {
-            resolve({
-              nombre: files[i].name,
-              mimeType: files[i].type,
-              base64: e.target.result.split(',')[1]
-            });
-          };
-          reader.readAsDataURL(files[i]);
-        }));
-      }
-      return Promise.all(promesas);
-    }
-  </script>
-</body>
-</html>
+    const NOMBRES_MESES
