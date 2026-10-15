@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Distrito 2 - Costa Rica</title>
 
-  <!-- Enlace al Manifest para Habilitar Instalación como PWA -->
+  <!-- Enlace al Manifest para Habilitar Instalación PWA -->
   <link rel="manifest" href="./manifest.json">
 
-  <!-- Configuraciones para Navegadores Móviles (Android e iOS) -->
+  <!-- Configuraciones para Navegadores Móviles -->
   <meta name="theme-color" content="#1e3a8a">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -37,19 +37,15 @@
 </head>
 <body>
 
-  <!-- Contenedor Principal enPantalla Completa -->
-  <iframe 
-    src="https://script.google.com/macros/s/AKfycbzO3lS3X_C0c4kG24r6mFmsRsn23aIomzMvdYjT-5o8_v-o10HlU0_mRjH-iZ09T-s/exec" 
-    allow="geolocation; microphone; camera">
-  </iframe>
+  <!-- iFrame con la nueva URL desplegada de Google Apps Script -->
+  <iframe src="https://script.google.com/macros/s/AKfycbw7v-iU0tCN2YHwBzMCNAX_vZEbTZMgDktYeBc7Nkzd9Ahu-FLSszSKsT9FzSKDEQMC/exec" allow="geolocation; microphone; camera"></iframe>
 
-  <!-- Script para Registrar el Service Worker y Activar el Botón de Instalación -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js')
-          .then(reg => console.log('Service Worker registrado con éxito:', reg.scope))
-          .catch(err => console.log('Error al registrar Service Worker:', err));
+          .then(reg => console.log('SW activo:', reg.scope))
+          .catch(err => console.log('Error SW:', err));
       });
     }
   </script>
