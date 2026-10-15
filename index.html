@@ -56,7 +56,8 @@
   </div>
 
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyla23f7O9c7SRzkouNEuTeKS-zzxksM0Nn7nkeZVcZ7mQ_GNOpRrPAU-ckQBKRjcdG/exec";
+    // URL sincronizada con el despliegue activo en Google Apps Script
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw7v-iU0tCN2YHwBzMCNAX_vZEbTZMgDktYeBc7Nkzd9Ahu-FLSszSKsT9FzSKDEQMC/exec";
 
     function validarEIngresar() {
       const correo = document.getElementById('input-correo').value.trim();
@@ -69,7 +70,7 @@
 
       mostrarMensaje("Ingresando y verificando perfil...", "bg-blue-100 text-blue-800");
 
-      // Redirección directa incluyendo el parámetro authuser=0 para evitar bloqueos de sesión multicuenta en dispositivos móviles
+      // Redirección directa incluyendo el parámetro authuser=0 para evitar bloqueos de sesión multicuenta
       const urlDestino = `${SCRIPT_URL}?correo=${encodeURIComponent(correo)}&pass=${encodeURIComponent(pass)}&authuser=0`;
       
       setTimeout(() => {
