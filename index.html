@@ -78,25 +78,28 @@
     <iframe id="iframe-webapp" class="w-full h-full border-none" src=""></iframe>
   </div>
 
+  <!-- Elemento de transporte directo para evitar restricciones CORS -->
+  <iframe name="iframe-oculto" id="iframe-oculto" class="hidden"></iframe>
+  <form id="form-oculto" target="iframe-oculto" method="GET" class="hidden"></form>
+
   <script>
-    // URL Web App Principal
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyla23f7O9c7SRzkouNEuTeKS-zzxksM0Nn7nkeZVcZ7mQ_GNOpRrPAU-ckQBKRjcdG/exec";
     const FORMULARIO_URL = "https://script.google.com/macros/s/AKfycbyla23f7O9c7SRzkouNEuTeKS-zzxksM0Nn7nkeZVcZ7mQ_GNOpRrPAU-ckQBKRjcdG/exec";
 
     let perfilDataActual = null;
 
-    // Callback global de respuesta
-    window.procesarRespuestaServidor = function(data) {
+    // Escuchar respuesta enviada desde Apps Script de forma transparente
+    window.addEventListener('message', function(event) {
+      if (!event.data || typeof event.data !== 'object') return;
+      
+      const data = event.data;
       const btn = document.getElementById('btn-validar');
       const seccionPerfil = document.getElementById('seccion-perfil');
 
       btn.disabled = false;
       btn.innerText = "Ingresar / Validar Perfil";
 
-      const tagScriptTemp = document.getElementById('jsonp-script-temp');
-      if (tagScriptTemp) tagScriptTemp.remove();
-
-      if (data && data.exito) {
+      if (data.exito) {
         mostrarMensaje("¡Perfil verificado correctamente!", "bg-green-100 text-green-700");
         perfilDataActual = data.usuario;
 
@@ -108,22 +111,17 @@
         seccionPerfil.classList.remove('hidden');
       } else {
         seccionPerfil.classList.add('hidden');
-        mostrarMensaje(data ? data.mensaje : "Error al procesar las credenciales.", "bg-red-100 text-red-700");
+        mostrarMensaje(data.mensaje || "Credenciales incorrectas.", "bg-red-100 text-red-700");
       }
-    };
+    });
 
     function validarCorreo() {
       const correo = document.getElementById('input-correo').value.trim();
       const pass = document.getElementById('input-pass').value.trim();
       const btn = document.getElementById('btn-validar');
 
-      if (!correo) {
-        mostrarMensaje("Por favor ingresa tu correo institucional.", "bg-red-100 text-red-700");
-        return;
-      }
-
-      if (!pass) {
-        mostrarMensaje("Por favor ingresa tu contraseña.", "bg-red-100 text-red-700");
+      if (!correo || !pass) {
+        mostrarMensaje("Ingresa tu correo y contraseña.", "bg-red-100 text-red-700");
         return;
       }
 
@@ -131,34 +129,22 @@
       btn.innerText = "Verificando credenciales...";
       mostrarMensaje("Consultando directorio...", "bg-yellow-100 text-yellow-800");
 
-      const viejoScript = document.getElementById('jsonp-script-temp');
-      if (viejoScript) viejoScript.remove();
-
-      // Construcción segura del script JSONP
-      const urlPeticion = `${SCRIPT_URL}?correo=${encodeURIComponent(correo)}&pass=${encodeURIComponent(pass)}&callback=procesarRespuestaServidor`;
-
-      const script = document.createElement('script');
-      script.id = 'jsonp-script-temp';
-      script.src = urlPeticion;
-      
-      script.onerror = function() {
-        btn.disabled = false;
-        btn.innerText = "Ingresar / Validar Perfil";
-        mostrarMensaje("Error al conectar con la base de datos de Google.", "bg-red-100 text-red-700");
-      };
-
-      document.body.appendChild(script);
+      // Petición directa a través del iframe técnico
+      const form = document.getElementById('form-oculto');
+      form.action = SCRIPT_URL;
+      form.innerHTML = `
+        <input type="hidden" name="correo" value="${correo}">
+        <input type="hidden" name="pass" value="${pass}">
+        <input type="hidden" name="postmessage" value="true">
+      `;
+      form.submit();
     }
 
     function irAFormulario() {
       if (!perfilDataActual) return;
-      
       const contenedorIframe = document.getElementById('contenedor-iframe');
       const iframe = document.getElementById('iframe-webapp');
-
-      const urlConIglesia = `${FORMULARIO_URL}?iglesia=${encodeURIComponent(perfilDataActual.iglesia)}`;
-      
-      iframe.src = urlConIglesia;
+      iframe.src = `${FORMULARIO_URL}?iglesia=${encodeURIComponent(perfilDataActual.iglesia)}`;
       contenedorIframe.classList.remove('hidden');
     }
 
@@ -167,10 +153,6 @@
       msg.className = `text-xs text-center p-2 rounded-lg ${clases}`;
       msg.innerText = texto;
       msg.classList.remove('hidden');
-    }
-
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw.js');
     }
   </script>
 </body>
