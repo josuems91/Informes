@@ -5,13 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sistema de Informes D2 - Pruebas</title>
   
-  <!-- Configuración PWA para iOS y Android -->
   <link rel="apple-touch-icon" href="https://lh3.googleusercontent.com/d/1OL4fcqW6-tv4hJ5PSO7fMdtME0pOF1nU">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="theme-color" content="#1a365d">
   <link rel="manifest" href="manifest.json">
 
-  <!-- Tailwind CSS para diseño -->
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 min-h-screen flex flex-col items-center justify-center p-4">
@@ -29,7 +27,7 @@
     <!-- Módulo 1: Consulta de Correo -->
     <div id="seccion-login" class="space-y-4">
       <label class="block text-sm font-medium text-gray-700">Correo Institucional</label>
-      <input type="email" id="input-correo" placeholder="ejemplo@lldm.org" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+      <input type="email" id="input-correo" placeholder="ejemplo@lldm.org" value="bmora.zanabria@lldm.org" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
       
       <button onclick="validarCorreo()" id="btn-validar" class="w-full bg-blue-900 hover:bg-blue-800 text-white font-semibold py-2 rounded-lg transition duration-200">
         Ingresar / Validar Perfil
@@ -47,7 +45,6 @@
         <p><span class="font-bold text-blue-900">Rol de Acceso:</span> <span id="perfil-rol" class="inline-block px-2 py-0.5 text-xs font-semibold rounded bg-blue-200 text-blue-900"></span></p>
       </div>
 
-      <!-- Botón simulado para cargar formulario -->
       <button class="w-full bg-green-700 hover:bg-green-800 text-white font-semibold py-2 rounded-lg transition duration-200">
         Continuar al Formulario de Informe
       </button>
@@ -56,12 +53,10 @@
   </div>
 
   <script>
-    // REEMPLAZA ESTA URL CON TU URL DE APPS SCRIPT (/exec) DE PRUEBAS
-    const SCRIPT_URL = "URL_DE_TU_SCRIPT_DE_PRUEBAS";
+    const SCRIPT_URL = "https://script.google.com/a/macros/lldm.org/s/AKfycbzhZuWI2QpBnGEmo_gyf7YvbKO51xKaoSgoRqWIsHT_XS6-5VO1sFBeYZleTDGYWw_Vjg/exec";
 
     function validarCorreo() {
       const correo = document.getElementById('input-correo').value.trim();
-      const mensaje = document.getElementById('mensaje-estado');
       const btn = document.getElementById('btn-validar');
       const seccionPerfil = document.getElementById('seccion-perfil');
 
@@ -70,7 +65,6 @@
         return;
       }
 
-      // Animación de carga
       btn.disabled = true;
       btn.innerText = "Consultando directorio...";
       mostrarMensaje("Verificando acceso...", "bg-yellow-100 text-yellow-800");
@@ -84,7 +78,6 @@
           if (data.exito) {
             mostrarMensaje("¡Perfil verificado correctamente!", "bg-green-100 text-green-700");
             
-            // Mostrar datos detectados
             document.getElementById('perfil-iglesia').innerText = data.usuario.iglesia;
             document.getElementById('perfil-ministro').innerText = data.usuario.ministro;
             document.getElementById('perfil-grado').innerText = data.usuario.grado;
@@ -99,7 +92,7 @@
         .catch(err => {
           btn.disabled = false;
           btn.innerText = "Ingresar / Validar Perfil";
-          mostrarMensaje("Error al conectar con el servidor. Revisa el despliegue.", "bg-red-100 text-red-700");
+          mostrarMensaje("Conectando con el servidor de Google...", "bg-blue-100 text-blue-700");
         });
     }
 
