@@ -61,39 +61,17 @@
     function validarEIngresar() {
       const correo = document.getElementById('input-correo').value.trim();
       const pass = document.getElementById('input-pass').value.trim();
-      const btn = document.getElementById('btn-validar');
 
       if (!correo || !pass) {
         mostrarMensaje("Por favor ingresa tu correo y contraseña.", "bg-red-100 text-red-700");
         return;
       }
 
-      btn.disabled = true;
-      btn.innerText = "Verificando credenciales...";
-      mostrarMensaje("Consultando directorio...", "bg-blue-100 text-blue-800");
+      mostrarMensaje("Ingresando...", "bg-blue-100 text-blue-800");
 
-      // Consultar Apps Script de manera directa
-      fetch(`${SCRIPT_URL}?correo=${encodeURIComponent(correo)}&pass=${encodeURIComponent(pass)}`)
-        .then(response => response.json())
-        .then(data => {
-          if (data.exito) {
-            mostrarMensaje("¡Perfil verificado! Redirigiendo al formulario...", "bg-green-100 text-green-800 font-bold");
-            const iglesiaEscapada = encodeURIComponent(data.usuario.iglesia || '');
-            
-            setTimeout(() => {
-              window.location.href = `${SCRIPT_URL}?iglesia=${iglesiaEscapada}`;
-            }, 800);
-          } else {
-            btn.disabled = false;
-            btn.innerText = "Ingresar / Validar Perfil";
-            mostrarMensaje(data.mensaje || "Credenciales incorrectas.", "bg-red-100 text-red-700");
-          }
-        })
-        .catch(error => {
-          btn.disabled = false;
-          btn.innerText = "Ingresar / Validar Perfil";
-          mostrarMensaje("Error al conectar con el servidor. Intenta nuevamente.", "bg-red-100 text-red-700");
-        });
+      // Redirección directa para saltar bloqueos de CORS entre navegadores
+      const urlDestino = `${SCRIPT_URL}?correo=${encodeURIComponent(correo)}&pass=${encodeURIComponent(pass)}`;
+      window.location.href = urlDestino;
     }
 
     function mostrarMensaje(texto, clases) {
