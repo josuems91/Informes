@@ -15,28 +15,28 @@
 <body class="bg-gray-100 min-h-screen flex flex-col items-center justify-center p-4">
 
   <!-- Card Principal -->
-  <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 border border-gray-200">
+  <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg p-6 border border-gray-200 my-6">
     
     <!-- Encabezado -->
     <div class="text-center mb-6">
       <img src="https://lh3.googleusercontent.com/d/1OL4fcqW6-tv4hJ5PSO7fMdtME0pOF1nU" alt="Escudo D2" class="w-20 h-20 mx-auto mb-2 object-contain">
       <h1 class="text-xl font-bold text-blue-900">Distrito 2 - Entorno de Pruebas</h1>
-      <p class="text-xs text-gray-500">Validación de Perfil Ministerial</p>
+      <p class="text-xs text-gray-500">Sistema Único de Informes Ministeriales</p>
     </div>
 
     <!-- Módulo 1: Consulta de Correo -->
     <div id="seccion-login" class="space-y-4">
       <label class="block text-sm font-medium text-gray-700">Correo Institucional</label>
-      <input type="email" id="input-correo" placeholder="ejemplo@lldm.org" value="bmora.zanabria@lldm.org" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+      <input type="email" id="input-correo" placeholder="ejemplo@lldm.org" value="bmora.zanabria@lldm.org" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-gray-800">
       
-      <button onclick="validarCorreo()" id="btn-validar" class="w-full bg-blue-900 hover:bg-blue-800 text-white font-semibold py-2 rounded-lg transition duration-200">
+      <button onclick="validarCorreo()" id="btn-validar" class="w-full bg-blue-900 hover:bg-blue-800 text-white font-semibold py-2 rounded-lg transition duration-200 shadow-md">
         Ingresar / Validar Perfil
       </button>
 
       <div id="mensaje-estado" class="text-xs text-center hidden p-2 rounded-lg"></div>
     </div>
 
-    <!-- Módulo 2: Vista de Perfil Detectado (Oculto por defecto) -->
+    <!-- Módulo 2: Vista de Perfil Detectado -->
     <div id="seccion-perfil" class="hidden space-y-4 border-t pt-4 mt-4">
       <div class="bg-blue-50 p-4 rounded-xl border border-blue-200 space-y-2 text-sm">
         <p><span class="font-bold text-blue-900">Iglesia:</span> <span id="perfil-iglesia" class="text-gray-800"></span></p>
@@ -45,9 +45,82 @@
         <p><span class="font-bold text-blue-900">Rol de Acceso:</span> <span id="perfil-rol" class="inline-block px-2 py-0.5 text-xs font-semibold rounded bg-blue-200 text-blue-900"></span></p>
       </div>
 
-      <button class="w-full bg-green-700 hover:bg-green-800 text-white font-semibold py-2 rounded-lg transition duration-200">
-        Continuar al Formulario de Informe
+      <button onclick="irAFormulario()" class="w-full bg-green-700 hover:bg-green-800 text-white font-semibold py-2.5 rounded-lg transition duration-200 shadow-md flex items-center justify-center gap-2">
+        <span>Continuar al Formulario de Informe</span>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+        </svg>
       </button>
+    </div>
+
+    <!-- Módulo 3: Formulario de Informe Mensual (Nuevo) -->
+    <div id="seccion-formulario" class="hidden space-y-5 border-t pt-4 mt-4">
+      <div class="bg-emerald-50 border border-emerald-200 p-3 rounded-xl text-center">
+        <p class="text-xs text-emerald-800 font-semibold">Formulario de Reporte Mensual</p>
+        <p class="text-xs text-emerald-600" id="form-subtitulo">Distrito 2 - Costa Rica</p>
+      </div>
+
+      <form id="form-informe" onsubmit="enviarInforme(event)" class="space-y-4">
+        
+        <!-- Datos de Control -->
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 mb-1">Mes a Reportar</label>
+            <select required id="mes-reporte" class="w-full text-sm border rounded-lg px-3 py-2 bg-white focus:ring-2 focus:ring-blue-500">
+              <option value="">Seleccionar...</option>
+              <option value="Enero">Enero</option>
+              <option value="Febrero">Febrero</option>
+              <option value="Marzo">Marzo</option>
+              <option value="Abril">Abril</option>
+              <option value="Mayo">Mayo</option>
+              <option value="Junio">Junio</option>
+              <option value="Julio">Julio</option>
+              <option value="Agosto">Agosto</option>
+              <option value="Septiembre">Septiembre</option>
+              <option value="Octubre" selected>Octubre</option>
+              <option value="Noviembre">Noviembre</option>
+              <option value="Diciembre">Diciembre</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 mb-1">Año</label>
+            <input type="number" id="anio-reporte" value="2026" readonly class="w-full text-sm border rounded-lg px-3 py-2 bg-gray-100 text-gray-600">
+          </div>
+        </div>
+
+        <!-- Datos de Membresía -->
+        <div class="space-y-3 pt-2">
+          <h3 class="text-xs font-bold text-blue-900 uppercase tracking-wider border-b pb-1">Membresía Activa</h3>
+          
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs text-gray-600">Bautizados</label>
+              <input type="number" required min="0" id="num-bautizados" placeholder="0" class="w-full text-sm border rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div>
+              <label class="block text-xs text-gray-600">Nuevos Creyentes</label>
+              <input type="number" required min="0" id="num-creyentes" placeholder="0" class="w-full text-sm border rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-blue-500">
+            </div>
+          </div>
+        </div>
+
+        <!-- Observaciones o Resumen -->
+        <div class="space-y-1">
+          <label class="block text-xs font-semibold text-gray-600">Observaciones Generales</label>
+          <textarea id="obs-informe" rows="3" placeholder="Escriba aquí aspectos relevantes del mes..." class="w-full text-sm border rounded-lg p-3 focus:ring-2 focus:ring-blue-500"></textarea>
+        </div>
+
+        <!-- Botones de Acción -->
+        <div class="pt-2 space-y-2">
+          <button type="submit" id="btn-enviar" class="w-full bg-blue-900 hover:bg-blue-800 text-white font-semibold py-2.5 rounded-lg transition duration-200 shadow-md">
+            Guardar y Enviar Informe
+          </button>
+          
+          <button type="button" onclick="volverAPerfil()" class="w-full text-xs text-gray-500 hover:text-gray-700 py-1">
+            ← Volver a datos de perfil
+          </button>
+        </div>
+      </form>
     </div>
 
   </div>
@@ -55,10 +128,13 @@
   <script>
     const SCRIPT_URL = "https://script.google.com/a/macros/lldm.org/s/AKfycbzhZuWI2QpBnGEmo_gyf7YvbKO51xKaoSgoRqWIsHT_XS6-5VO1sFBeYZleTDGYWw_Vjg/exec";
 
+    let perfilDataActual = null;
+
     function validarCorreo() {
       const correo = document.getElementById('input-correo').value.trim();
       const btn = document.getElementById('btn-validar');
       const seccionPerfil = document.getElementById('seccion-perfil');
+      const seccionFormulario = document.getElementById('seccion-formulario');
 
       if (!correo) {
         mostrarMensaje("Por favor ingresa tu correo institucional.", "bg-red-100 text-red-700");
@@ -78,14 +154,18 @@
           if (data.exito) {
             mostrarMensaje("¡Perfil verificado correctamente!", "bg-green-100 text-green-700");
             
+            perfilDataActual = data.usuario;
+
             document.getElementById('perfil-iglesia').innerText = data.usuario.iglesia;
             document.getElementById('perfil-ministro').innerText = data.usuario.ministro;
             document.getElementById('perfil-grado').innerText = data.usuario.grado;
             document.getElementById('perfil-rol').innerText = data.usuario.rol;
 
             seccionPerfil.classList.remove('hidden');
+            seccionFormulario.classList.add('hidden');
           } else {
             seccionPerfil.classList.add('hidden');
+            seccionFormulario.classList.add('hidden');
             mostrarMensaje(data.mensaje, "bg-red-100 text-red-700");
           }
         })
@@ -94,6 +174,35 @@
           btn.innerText = "Ingresar / Validar Perfil";
           mostrarMensaje("Conectando con el servidor de Google...", "bg-blue-100 text-blue-700");
         });
+    }
+
+    function irAFormulario() {
+      if (!perfilDataActual) return;
+
+      document.getElementById('seccion-login').classList.add('hidden');
+      document.getElementById('seccion-perfil').classList.add('hidden');
+      
+      document.getElementById('form-subtitulo').innerText = `${perfilDataActual.iglesia} — Encargado: ${perfilDataActual.ministro}`;
+      document.getElementById('seccion-formulario').classList.remove('hidden');
+    }
+
+    function volverAPerfil() {
+      document.getElementById('seccion-formulario').classList.add('hidden');
+      document.getElementById('seccion-login').classList.remove('hidden');
+      document.getElementById('seccion-perfil').classList.remove('hidden');
+    }
+
+    function enviarInforme(e) {
+      e.preventDefault();
+      const btn = document.getElementById('btn-enviar');
+      btn.disabled = true;
+      btn.innerText = "Registrando informe...";
+
+      setTimeout(() => {
+        alert(`¡Informe de ${document.getElementById('mes-reporte').value} registrado exitosamente para la iglesia ${perfilDataActual.iglesia}!`);
+        btn.disabled = false;
+        btn.innerText = "Guardar y Enviar Informe";
+      }, 1500);
     }
 
     function mostrarMensaje(texto, clases) {
