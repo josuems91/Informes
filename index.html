@@ -5,16 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Distrito 2 - Costa Rica</title>
 
-  <!-- Configuraciones para permitir la instalación de la App (PWA) -->
+  <!-- Enlace al Manifest para Habilitar Instalación como PWA -->
+  <link rel="manifest" href="./manifest.json">
+
+  <!-- Configuraciones para Navegadores Móviles (Android e iOS) -->
   <meta name="theme-color" content="#1e3a8a">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Distrito 2">
   <link rel="apple-touch-icon" href="https://lh3.googleusercontent.com/d/1OL4fcqW6-tv4hJ5PSO7fMdtME0pOF1nU">
-  
-  <!-- Manifest en línea para activar la descarga/instalación -->
-  <link rel="manifest" href='data:application/manifest+json,{"name":"Distrito 2 - Costa Rica","short_name":"Distrito 2","start_url":".","display":"standalone","background_color":"#f8fafc","theme_color":"#1e3a8a","icons":[{"src":"https://lh3.googleusercontent.com/d/1OL4fcqW6-tv4hJ5PSO7fMdtME0pOF1nU","sizes":"512x512","type":"image/png"}]}'>
 
   <style>
     * {
@@ -37,10 +37,22 @@
 </head>
 <body>
 
+  <!-- Contenedor Principal enPantalla Completa -->
   <iframe 
     src="https://script.google.com/macros/s/AKfycbzO3lS3X_C0c4kG24r6mFmsRsn23aIomzMvdYjT-5o8_v-o10HlU0_mRjH-iZ09T-s/exec" 
     allow="geolocation; microphone; camera">
   </iframe>
+
+  <!-- Script para Registrar el Service Worker y Activar el Botón de Instalación -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then(reg => console.log('Service Worker registrado con éxito:', reg.scope))
+          .catch(err => console.log('Error al registrar Service Worker:', err));
+      });
+    }
+  </script>
 
 </body>
 </html>
