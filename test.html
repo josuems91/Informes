@@ -35,10 +35,17 @@
       <p class="text-xs text-gray-500">Validación de Perfil Ministerial</p>
     </div>
 
-    <!-- Módulo 1: Consulta de Correo -->
+    <!-- Módulo 1: Consulta de Correo y Contraseña -->
     <div id="seccion-login" class="space-y-4">
-      <label class="block text-sm font-medium text-gray-700">Correo Institucional</label>
-      <input type="email" id="input-correo" placeholder="ejemplo@lldm.org" value="bmora.zanabria@lldm.org" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-gray-800">
+      <div>
+        <label class="block text-xs font-semibold text-gray-700 mb-1">Correo Institucional</label>
+        <input type="email" id="input-correo" placeholder="ejemplo@lldm.org" value="bmora.zanabria@lldm.org" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm text-gray-800">
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold text-gray-700 mb-1">Contraseña</label>
+        <input type="password" id="input-pass" placeholder="••••••••" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm text-gray-800">
+      </div>
       
       <button onclick="validarCorreo()" id="btn-validar" class="w-full bg-blue-900 hover:bg-blue-800 text-white font-semibold py-2.5 rounded-lg transition duration-200 shadow-md">
         Ingresar / Validar Perfil
@@ -66,19 +73,20 @@
 
   </div>
 
-  <!-- Contenedor del Formulario WebApp Original (Oculto al inicio) -->
+  <!-- Contenedor del Formulario WebApp -->
   <div id="contenedor-iframe" class="hidden fixed inset-0 w-full h-full bg-white z-50">
     <iframe id="iframe-webapp" class="w-full h-full border-none" src=""></iframe>
   </div>
 
   <script>
     const SCRIPT_URL = "https://script.google.com/a/macros/lldm.org/s/AKfycbzhZuWI2QpBnGEmo_gyf7YvbKO51xKaoSgoRqWIsHT_XS6-5VO1sFBeYZleTDGYWw_Vjg/exec";
-    
-    // URL original del WebApp embebido en index.html
     const FORMULARIO_URL = "https://script.google.com/macros/s/AKfycbyla23f7O9c7SRzkouNEuTeKS-zzxksM0Nn7nkeZVcZ7mQ_GNOpRrPAU-ckQBKRjcdG/exec";
+
+    let perfilDataActual = null;
 
     function validarCorreo() {
       const correo = document.getElementById('input-correo').value.trim();
+      const pass = document.getElementById('input-pass').value.trim();
       const btn = document.getElementById('btn-validar');
       const seccionPerfil = document.getElementById('seccion-perfil');
 
@@ -87,11 +95,16 @@
         return;
       }
 
-      btn.disabled = true;
-      btn.innerText = "Consultando directorio...";
-      mostrarMensaje("Verificando acceso...", "bg-yellow-100 text-yellow-800");
+      if (!pass) {
+        mostrarMensaje("Por favor ingresa tu contraseña.", "bg-red-100 text-red-700");
+        return;
+      }
 
-      fetch(`${SCRIPT_URL}?correo=${encodeURIComponent(correo)}`)
+      btn.disabled = true;
+      btn.innerText = "Verificando credenciales...";
+      mostrarMensaje("Consultando directorio...", "bg-yellow-100 text-yellow-800");
+
+      fetch(`${SCRIPT_URL}?correo=${encodeURIComponent(correo)}&pass=${encodeURIComponent(pass)}`)
         .then(res => res.json())
         .then(data => {
           btn.disabled = false;
@@ -99,6 +112,7 @@
 
           if (data.exito) {
             mostrarMensaje("¡Perfil verificado correctamente!", "bg-green-100 text-green-700");
+            perfilDataActual = data.usuario;
 
             document.getElementById('perfil-iglesia').innerText = data.usuario.iglesia;
             document.getElementById('perfil-ministro').innerText = data.usuario.ministro;
@@ -119,13 +133,15 @@
     }
 
     function irAFormulario() {
+      if (!perfilDataActual) return;
+      
       const contenedorIframe = document.getElementById('contenedor-iframe');
       const iframe = document.getElementById('iframe-webapp');
 
-      // Cargar la URL del formulario WebApp dentro del iframe
-      iframe.src = FORMULARIO_URL;
+      // Pasamos la iglesia como parámetro en la URL del iframe
+      const urlConIglesia = `${FORMULARIO_URL}?iglesia=${encodeURIComponent(perfilDataActual.iglesia)}`;
       
-      // Mostrar pantalla completa
+      iframe.src = urlConIglesia;
       contenedorIframe.classList.remove('hidden');
     }
 
