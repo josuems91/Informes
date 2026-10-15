@@ -79,13 +79,13 @@
   </div>
 
   <script>
-    // URL del ejecutable de la Web App Principal
+    // URL Web App Principal
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyla23f7O9c7SRzkouNEuTeKS-zzxksM0Nn7nkeZVcZ7mQ_GNOpRrPAU-ckQBKRjcdG/exec";
     const FORMULARIO_URL = "https://script.google.com/macros/s/AKfycbyla23f7O9c7SRzkouNEuTeKS-zzxksM0Nn7nkeZVcZ7mQ_GNOpRrPAU-ckQBKRjcdG/exec";
 
     let perfilDataActual = null;
 
-    // Función callback global para procesar respuesta de Google Apps Script
+    // Callback global de respuesta
     window.procesarRespuestaServidor = function(data) {
       const btn = document.getElementById('btn-validar');
       const seccionPerfil = document.getElementById('seccion-perfil');
@@ -93,23 +93,22 @@
       btn.disabled = false;
       btn.innerText = "Ingresar / Validar Perfil";
 
-      // Eliminar el script inyectado temporalmente
       const tagScriptTemp = document.getElementById('jsonp-script-temp');
       if (tagScriptTemp) tagScriptTemp.remove();
 
-      if (data.exito) {
+      if (data && data.exito) {
         mostrarMensaje("¡Perfil verificado correctamente!", "bg-green-100 text-green-700");
         perfilDataActual = data.usuario;
 
-        document.getElementById('perfil-iglesia').innerText = data.usuario.iglesia;
-        document.getElementById('perfil-ministro').innerText = data.usuario.ministro;
-        document.getElementById('perfil-grado').innerText = data.usuario.grado;
-        document.getElementById('perfil-rol').innerText = data.usuario.rol;
+        document.getElementById('perfil-iglesia').innerText = data.usuario.iglesia || '';
+        document.getElementById('perfil-ministro').innerText = data.usuario.ministro || '';
+        document.getElementById('perfil-grado').innerText = data.usuario.grado || '';
+        document.getElementById('perfil-rol').innerText = data.usuario.rol || '';
 
         seccionPerfil.classList.remove('hidden');
       } else {
         seccionPerfil.classList.add('hidden');
-        mostrarMensaje(data.mensaje, "bg-red-100 text-red-700");
+        mostrarMensaje(data ? data.mensaje : "Error al procesar las credenciales.", "bg-red-100 text-red-700");
       }
     };
 
@@ -132,19 +131,20 @@
       btn.innerText = "Verificando credenciales...";
       mostrarMensaje("Consultando directorio...", "bg-yellow-100 text-yellow-800");
 
-      // Limpiar script viejo si existía
       const viejoScript = document.getElementById('jsonp-script-temp');
       if (viejoScript) viejoScript.remove();
 
-      // Inyección JSONP para saltar restricciones CORS
+      // Construcción segura del script JSONP
+      const urlPeticion = `${SCRIPT_URL}?correo=${encodeURIComponent(correo)}&pass=${encodeURIComponent(pass)}&callback=procesarRespuestaServidor`;
+
       const script = document.createElement('script');
       script.id = 'jsonp-script-temp';
-      script.src = `${SCRIPT_URL}?correo=${encodeURIComponent(correo)}&pass=${encodeURIComponent(pass)}&callback=procesarRespuestaServidor`;
+      script.src = urlPeticion;
       
       script.onerror = function() {
         btn.disabled = false;
         btn.innerText = "Ingresar / Validar Perfil";
-        mostrarMensaje("No se pudo conectar con el servidor. Revisa la conexión.", "bg-red-100 text-red-700");
+        mostrarMensaje("Error al conectar con la base de datos de Google.", "bg-red-100 text-red-700");
       };
 
       document.body.appendChild(script);
@@ -156,7 +156,6 @@
       const contenedorIframe = document.getElementById('contenedor-iframe');
       const iframe = document.getElementById('iframe-webapp');
 
-      // Pasamos la iglesia como parámetro en la URL del iframe
       const urlConIglesia = `${FORMULARIO_URL}?iglesia=${encodeURIComponent(perfilDataActual.iglesia)}`;
       
       iframe.src = urlConIglesia;
