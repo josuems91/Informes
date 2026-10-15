@@ -21,13 +21,12 @@
     </div>
 
     <!-- ========================================== -->
-    <!-- VISTA 1: FORMULARIO DE INICIO DE SESIÓN -->
+    <!-- VISTA 1: INICIO DE SESIÓN -->
     <!-- ========================================== -->
     <div id="vista-login" class="space-y-4">
       <h2 class="text-sm font-bold text-gray-700 text-center uppercase tracking-wide border-b pb-2">Acceso de Ministros</h2>
       
-      <!-- FORMULARIO SIN ACTION PARA EVITAR REDIRECCIÓN -->
-      <form id="form-login" onsubmit="ejecutarLogin(event)" class="space-y-3">
+      <div class="space-y-3">
         <div>
           <label class="block text-xs font-bold text-gray-700 mb-1">Correo Electrónico:</label>
           <input type="email" id="login-correo" required placeholder="ejemplo@lldm.org" class="w-full px-3 py-2.5 border rounded-xl focus:ring-2 focus:ring-blue-500 text-sm text-gray-800 bg-white">
@@ -38,28 +37,27 @@
           <input type="password" id="login-pass" required placeholder="••••••••" class="w-full px-3 py-2.5 border rounded-xl focus:ring-2 focus:ring-blue-500 text-sm text-gray-800 bg-white">
         </div>
 
-        <button type="submit" id="btn-login" class="w-full bg-blue-800 hover:bg-blue-900 text-white font-bold py-3 rounded-xl transition duration-200 shadow-md mt-2">
+        <!-- Botón tipo button para impedir recargas involuntarias -->
+        <button type="button" onclick="ejecutarLogin()" id="btn-login" class="w-full bg-blue-800 hover:bg-blue-900 text-white font-bold py-3 rounded-xl transition duration-200 shadow-md mt-2">
           Ingresar al Sistema
         </button>
-      </form>
+      </div>
 
       <div id="msg-login" class="text-xs text-center hidden p-3 rounded-xl font-medium"></div>
     </div>
 
     <!-- ========================================== -->
-    <!-- VISTA 2: FORMULARIO DE INFORME (OCULTO INICIALMENTE) -->
+    <!-- VISTA 2: FORMULARIO DE INFORME -->
     <!-- ========================================== -->
     <div id="vista-formulario" class="hidden space-y-4">
       
-      <!-- Pestañas de Navegación -->
       <div class="flex justify-between bg-blue-50/60 p-1.5 rounded-xl text-xs font-semibold text-blue-800 text-center">
         <div class="flex-1 py-1.5 bg-white rounded-lg shadow-sm border border-blue-100">1. Iglesia</div>
         <div class="flex-1 py-1.5">2. Actividad</div>
         <div class="flex-1 py-1.5">3. Archivos</div>
       </div>
 
-      <!-- FORMULARIO SIN ACTION PARA PROCESAR CON FETCH -->
-      <form id="formulario-informe" onsubmit="enviarFormulario(event)" class="space-y-4">
+      <div class="space-y-4">
         
         <!-- 1. Iglesia / Localidad -->
         <div>
@@ -107,13 +105,13 @@
           <input type="file" id="archivosFotos" multiple accept="image/*" class="w-full text-xs text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200">
         </div>
 
-        <button type="submit" id="btn-enviar" class="w-full bg-blue-700 hover:bg-blue-800 text-white font-bold py-3 rounded-xl transition duration-200 shadow-md mt-4">
+        <button type="button" onclick="enviarFormulario()" id="btn-enviar" class="w-full bg-blue-700 hover:bg-blue-800 text-white font-bold py-3 rounded-xl transition duration-200 shadow-md mt-4">
           Enviar Paquete Completo
         </button>
 
         <div id="estado-envio" class="text-xs text-center hidden p-3 rounded-xl font-medium"></div>
 
-      </form>
+      </div>
     </div>
 
   </div>
@@ -121,4 +119,191 @@
   <script>
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzO3lS3X_C0c4kG24r6mFmsRsn23aIomzMvdYjT-5o8_v-o10HlU0_mRjH-iZ09T-s/exec";
 
-    const NOMBRES_MESES
+    const NOMBRES_MESES = [
+      "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+      "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+    ];
+
+    function ejecutarLogin() {
+      const correoInput = document.getElementById('login-correo');
+      const passInput = document.getElementById('login-pass');
+      const btn = document.getElementById('btn-login');
+      const msg = document.getElementById('msg-login');
+
+      const correo = correoInput.value.trim();
+      const pass = passInput.value.trim();
+
+      if (!correo || !pass) {
+        msg.className = "text-xs text-center p-3 rounded-xl font-medium bg-amber-100 text-amber-900 block";
+        msg.innerText = "Por favor ingresa tu correo y contraseña.";
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerText = "Verificando credenciales...";
+      msg.className = "text-xs text-center p-3 rounded-xl font-medium bg-blue-100 text-blue-800 block";
+      msg.innerText = "Consultando directorio...";
+
+      const url = `${WEB_APP_URL}?action=login&correo=${encodeURIComponent(correo)}&pass=${encodeURIComponent(pass)}`;
+
+      fetch(url)
+        .then(res => res.json())
+        .then(data => {
+          btn.disabled = false;
+          btn.innerText = "Ingresar al Sistema";
+
+          if (data.exito) {
+            msg.className = "hidden";
+            document.getElementById('vista-login').classList.add('hidden');
+            document.getElementById('vista-formulario').classList.remove('hidden');
+            
+            inicializarFormulario(data.iglesia);
+          } else {
+            msg.className = "text-xs text-center p-3 rounded-xl font-medium bg-red-100 text-red-800 block";
+            msg.innerText = data.mensaje || "Credenciales incorrectas.";
+          }
+        })
+        .catch(err => {
+          btn.disabled = false;
+          btn.innerText = "Ingresar al Sistema";
+          msg.className = "text-xs text-center p-3 rounded-xl font-medium bg-red-100 text-red-800 block";
+          msg.innerText = "Error al conectar con la base de datos.";
+        });
+    }
+
+    function inicializarFormulario(nombreIglesia) {
+      document.getElementById('iglesia').value = nombreIglesia;
+
+      const hoy = new Date();
+      document.getElementById('fechaEvento').value = hoy.toISOString().split('T')[0];
+
+      const mesActualNombre = NOMBRES_MESES[hoy.getMonth()];
+      const anioActual = hoy.getFullYear();
+      const etiquetaMesActual = `${mesActualNombre} ${anioActual}`;
+
+      const url = `${WEB_APP_URL}?action=getCarpetas&iglesia=${encodeURIComponent(nombreIglesia)}`;
+
+      fetch(url)
+        .then(res => res.json())
+        .then(data => {
+          const selectMes = document.getElementById('mes');
+          selectMes.innerHTML = '';
+
+          if (data.exito && data.carpetas && data.carpetas.length > 0) {
+            selectMes.innerHTML = '<option value="">-- Selecciona la carpeta de periodo --</option>';
+            let indexSeleccionado = -1;
+
+            data.carpetas.forEach((item, index) => {
+              const opt = document.createElement('option');
+              opt.value = item.nombreReal;
+              opt.innerText = item.nombreLimpio;
+
+              if (item.nombreLimpio.toLowerCase() === etiquetaMesActual.toLowerCase()) {
+                indexSeleccionado = index;
+              }
+
+              selectMes.appendChild(opt);
+            });
+
+            if (indexSeleccionado !== -1) {
+              selectMes.selectedIndex = indexSeleccionado + 1;
+            } else {
+              selectMes.selectedIndex = 1;
+            }
+          } else {
+            selectMes.innerHTML = '<option value="">No se encontraron carpetas en Drive para esta iglesia</option>';
+          }
+        })
+        .catch(err => {
+          document.getElementById('mes').innerHTML = '<option value="">Error al obtener carpetas de Drive</option>';
+        });
+    }
+
+    function enviarFormulario() {
+      const btn = document.getElementById('btn-enviar');
+      const msg = document.getElementById('estado-envio');
+
+      const mes = document.getElementById('mes').value;
+      const fechaEvento = document.getElementById('fechaEvento').value;
+      const nombreActividad = document.getElementById('nombreActividad').value.trim();
+
+      if (!mes || !fechaEvento || !nombreActividad) {
+        msg.className = "text-xs text-center p-3 rounded-xl font-medium bg-amber-100 text-amber-900 block";
+        msg.innerText = "Por favor completa todos los campos del formulario antes de enviar.";
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerText = "Procesando y guardando...";
+      msg.className = "text-xs text-center p-3 rounded-xl font-medium bg-blue-100 text-blue-800 block";
+      msg.innerText = "Guardando archivos en Google Drive...";
+
+      const datosForm = {
+        iglesia: document.getElementById('iglesia').value,
+        mes: mes,
+        fechaEvento: fechaEvento,
+        nombreActividad: nombreActividad
+      };
+
+      const filesDoc = document.getElementById('archivosDoc').files;
+      const filesFotos = document.getElementById('archivosFotos').files;
+
+      Promise.all([
+        convertirArchivosBase64(filesDoc),
+        convertirArchivosBase64(filesFotos)
+      ]).then(([docs, fotos]) => {
+        const payload = {
+          datosFormulario: datosForm,
+          documentos: docs,
+          fotos: fotos
+        };
+
+        fetch(WEB_APP_URL, {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        })
+        .then(res => res.json())
+        .then(data => {
+          btn.disabled = false;
+          btn.innerText = "Enviar Paquete Completo";
+
+          if (data.exito) {
+            msg.className = "text-xs text-center p-3 rounded-xl font-medium bg-green-100 text-green-800 block";
+            msg.innerText = data.mensaje;
+            document.getElementById('archivosDoc').value = '';
+            document.getElementById('archivosFotos').value = '';
+            document.getElementById('nombreActividad').value = '';
+          } else {
+            msg.className = "text-xs text-center p-3 rounded-xl font-medium bg-red-100 text-red-800 block";
+            msg.innerText = "Error: " + data.mensaje;
+          }
+        })
+        .catch(err => {
+          btn.disabled = false;
+          btn.innerText = "Enviar Paquete Completo";
+          msg.className = "text-xs text-center p-3 rounded-xl font-medium bg-red-100 text-red-800 block";
+          msg.innerText = "Error de red al guardar los archivos.";
+        });
+      });
+    }
+
+    function convertirArchivosBase64(files) {
+      const promesas = [];
+      for (let i = 0; i < files.length; i++) {
+        promesas.push(new Promise(resolve => {
+          const reader = new FileReader();
+          reader.onload = e => {
+            resolve({
+              nombre: files[i].name,
+              mimeType: files[i].type,
+              base64: e.target.result.split(',')[1]
+            });
+          };
+          reader.readAsDataURL(files[i]);
+        }));
+      }
+      return Promise.all(promesas);
+    }
+  </script>
+</body>
+</html>
