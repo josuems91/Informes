@@ -4,51 +4,266 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Distrito 2 - Costa Rica</title>
-
-  <!-- Enlace al Manifest para Habilitar Instalación PWA -->
   <link rel="manifest" href="./manifest.json">
-
-  <!-- Configuraciones para Navegadores Móviles -->
   <meta name="theme-color" content="#1e3a8a">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Distrito 2">
   <link rel="apple-touch-icon" href="https://lh3.googleusercontent.com/d/1OL4fcqW6-tv4hJ5PSO7fMdtME0pOF1nU">
+  <script>
+    // Avisa a la página que contiene la app (si está dentro de otra) que ya cargó bien.
+    // Así esa página sabe cuándo mostrar ayuda si el enlace no abre.
+    (function() {
+      function avisarListo() {
+        try { window.top.postMessage({ app: 'distrito2', estado: 'listo' }, '*'); } catch (e) {}
+      }
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', avisarListo);
+      else avisarListo();
+    })();
 
+    // Si algo falla, el error se escribe en pantalla (así se puede saber qué pasó)
+    (function() {
+      function mostrar(texto) {
+        try {
+          var d = document.getElementById('d2-error');
+          if (!d) {
+            d = document.createElement('div');
+            d.id = 'd2-error';
+            d.style.cssText = 'position:fixed;left:0;right:0;bottom:0;z-index:99999;background:#fee2e2;color:#7f1d1d;font:12px sans-serif;padding:8px 10px;white-space:pre-wrap;word-break:break-word';
+            (document.body || document.documentElement).appendChild(d);
+          }
+          // Se conservan los primeros errores (el primero suele ser la causa de los demás)
+          if (!d.getAttribute('data-n')) d.setAttribute('data-n', '0');
+          var n = parseInt(d.getAttribute('data-n'), 10);
+          if (n < 3 && d.textContent.indexOf(texto) === -1) {
+            d.textContent += (n === 0 ? 'Error en la página: ' : '\n+ ') + texto;
+            d.setAttribute('data-n', String(n + 1));
+          }
+        } catch (e) {}
+      }
+      window.addEventListener('error', function(ev) {
+        var extra = '';
+        try {
+          // Si es un error de sintaxis, se muestra el texto de esa línea para ver qué la rompe
+          if (/SyntaxError/.test(ev.message) && ev.lineno > 0) {
+            var n = ev.lineno;
+            var enDoc = document.documentElement.outerHTML.split('\n');
+            var grande = '';
+            var todos = document.getElementsByTagName('script');
+            for (var k = 0; k < todos.length; k++) {
+              if (!todos[k].src && todos[k].textContent.length > grande.length) grande = todos[k].textContent;
+            }
+            var enScript = grande.split('\n');
+            var mostrarLinea = function(etiqueta, arreglo) {
+              var linea = arreglo[n - 1] || '';
+              var raros = [];
+              for (var q = 0; q < linea.length && raros.length < 8; q++) {
+                var cod = linea.charCodeAt(q);
+                if (cod < 32 || cod > 126) raros.push(cod.toString(16));
+              }
+              extra += '\n   ' + etiqueta + ' [' + n + '] ' + linea.slice(0, 100) + (raros.length ? '  <códigos: ' + raros.join(',') + '>' : '');
+            };
+            mostrarLinea('doc', enDoc);
+            mostrarLinea('script', enScript);
+            extra += '\n   col ' + ev.colno;
+          }
+        } catch (e2) {}
+        mostrar(ev.message + ' (línea ' + ev.lineno + ')' + extra);
+      });
+      window.addEventListener('unhandledrejection', function(ev) { mostrar(String((ev.reason && ev.reason.message) || ev.reason)); });
+    })();
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+    
     html, body {
-      width: 100%;
       height: 100%;
-      overflow: hidden;
-      background-color: #f8fafc;
+      overflow-x: hidden;
     }
-    iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
+ 
+    body {
+      min-height: 100vh;
+      min-height: 100dvh; /* alto visible real en celulares */
+    }
+ 
+    body { 
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #f1f5f9;
+      padding-bottom: calc(78px + env(safe-area-inset-bottom)) !important; /* Espacio para la barra inferior fija */
+    }
+ 
+    /* Sombras y bordes estilo App Nativa */
+    .card-modern {
+      background: #ffffff;
+      border-radius: 20px;
+      border: 1px solid #f1f5f9;
+      box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05);
+    }
+ 
+    .input-modern {
+      background-color: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      transition: all 0.2s ease;
+    }
+ 
+    .input-modern:focus {
+      background-color: #ffffff;
+      border-color: #1e3a8a;
+      box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+      outline: none;
+    }
+ 
+    .btn-primary-modern {
+      background-color: #0f2b7a;
+      border-radius: 16px;
+      box-shadow: 0 8px 20px -4px rgba(15, 43, 122, 0.35);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+ 
+    .btn-primary-modern:active {
+      transform: scale(0.98);
+    }
+ 
+    .bottom-nav-container {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(12px);
+      border-top: 1px solid #e2e8f0;
+      box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
+    }
+ 
+    /* Pestaña activa en la barra inferior */
+    .nav-item-active {
+      color: #0f2b7a !important;
+      font-weight: 700 !important;
+    }
+    .nav-item-active .nav-icon {
+      color: #0f2b7a !important;
+      transform: translateY(-2px);
+    }
+    .nav-indicator {
+      width: 24px;
+      height: 3px;
+      background-color: #0f2b7a;
+      border-radius: 99px;
     }
   </style>
 </head>
-<body>
-
-  <!-- iFrame con la URL completa desplegada de Google Apps Script -->
-  <iframe src="https://script.google.com/macros/s/AKfycbw7v-iU0tCN2YHwBzMCNAX_vZEbTZMgDktYeBc7Nkzd9Ahu-FLSszSKsT9FzSKDEQMC/exec"></iframe>
+<body class="flex flex-col items-center justify-start p-2 sm:p-4">
+  <div id="d2-cargando" style="margin-top:30vh;text-align:center;font-family:sans-serif;color:#1e3a8a;padding:0 24px">
+    <div style="font-size:34px"><i class="fa-solid fa-spinner fa-spin"></i></div>
+    <p style="margin-top:12px;font-weight:700">Distrito 2 - Costa Rica</p>
+    <p id="d2-cargando-txt" style="margin-top:6px;font-size:13px;color:#475569">Cargando la aplicación...</p>
+    <button id="d2-reintentar" type="button" onclick="d2Arrancar()" style="display:none;margin-top:14px;background:#0f2b7a;color:#fff;border:0;border-radius:12px;padding:10px 18px;font-weight:700">Reintentar</button>
+  </div>
 
   <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js')
-          .then(reg => console.log('SW activo:', reg.scope))
-          .catch(err => console.log('Error SW:', err));
+    // Dirección del servidor (Apps Script publicado para "Cualquier persona")
+    var API_URL = 'https://script.google.com/macros/s/AKfycbw7v-iU0tCN2YHwBzMCNAX_vZEbTZMgDktYeBc7Nkzd9Ahu-FLSszSKsT9FzSKDEQMC/exec';
+
+    // Funciones que solo leen: si falla la señal, se reintentan solas
+    var D2_REINTENTABLES = { ping: 1, pantallaLogin: 1, restaurarSesion: 1 };
+
+    // Llama a una función del servidor sin usar la cuenta de Google de la persona
+    function d2Llamar(nombre, args) {
+      var intentos = D2_REINTENTABLES[nombre] ? 3 : 1;
+      function una(n) {
+        return fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ fn: nombre, args: args }),
+          credentials: 'omit',
+          redirect: 'follow'
+        }).then(function(r) { return r.text(); }).then(function(t) {
+          var x;
+          try { x = JSON.parse(t); } catch (e) {
+            throw new Error('El servidor no respondió como se esperaba. Avisa al administrador (puede que falte publicarlo para "Cualquier persona").');
+          }
+          if (!x.ok) throw new Error(x.error || 'Error del servidor');
+          return x.value;
+        }).catch(function(err) {
+          if (n < intentos && /Failed to fetch|NetworkError|Load failed/i.test(String(err && err.message))) {
+            return new Promise(function(ok) { setTimeout(ok, 1200 * n); }).then(function() { return una(n + 1); });
+          }
+          throw err;
+        });
+      }
+      return una(1);
+    }
+
+    // Misma forma de uso que google.script.run, para que la app no cambie
+    (function() {
+      function crear() {
+        var estado = {};
+        var proxy = new Proxy({}, { get: function(_, nombre) {
+          if (nombre === 'withSuccessHandler') return function(f) { estado.ok = f; return proxy; };
+          if (nombre === 'withFailureHandler') return function(f) { estado.fail = f; return proxy; };
+          if (typeof nombre !== 'string') return undefined;
+          return function() {
+            var args = Array.prototype.slice.call(arguments);
+            var ok = estado.ok, fail = estado.fail;
+            d2Llamar(nombre, args).then(function(v) { if (ok) ok(v); }, function(e) {
+              if (fail) fail({ message: String((e && e.message) || e) });
+            });
+          };
+        } });
+        return proxy;
+      }
+      window.google = { script: {} };
+      Object.defineProperty(window.google.script, 'run', { get: crear });
+    })();
+
+    // Pone en pantalla el contenido que arma el servidor y vuelve a activar sus scripts
+    function reemplazarPagina(html) {
+      var doc = new DOMParser().parseFromString(html, 'text/html');
+      if (!doc.body || !doc.body.innerHTML.trim()) throw new Error('La pantalla recibida está vacía.');
+      var codigos = [];
+      doc.body.querySelectorAll('script').forEach(function(sc) { codigos.push(sc.textContent); sc.remove(); });
+      document.body.className = doc.body.className;
+      document.body.innerHTML = doc.body.innerHTML;
+      codigos.forEach(function(codigo) {
+        var nuevo = document.createElement('script');
+        nuevo.text = codigo;
+        document.body.appendChild(nuevo);
       });
     }
-  </script>
 
+    function d2Falla(err) {
+      var t = document.getElementById('d2-cargando-txt');
+      if (t) t.textContent = 'No se pudo conectar: ' + String((err && err.message) || err) + ' Revisa tu señal e intenta de nuevo.';
+      var b = document.getElementById('d2-reintentar');
+      if (b) b.style.display = 'inline-block';
+    }
+
+    function d2Arrancar() {
+      var t = document.getElementById('d2-cargando-txt');
+      var b = document.getElementById('d2-reintentar');
+      if (t) t.textContent = 'Cargando la aplicación...';
+      if (b) b.style.display = 'none';
+
+      var s = null;
+      try { s = JSON.parse(sessionStorage.getItem('d2_sesion') || 'null'); } catch (e) {}
+
+      var login = function() {
+        return d2Llamar('pantallaLogin', []).then(function(r) { reemplazarPagina(r.html); });
+      };
+      var p = (s && s.correo && s.token)
+        ? d2Llamar('restaurarSesion', [s.correo, s.token]).then(function(r) {
+            if (r && r.exito) { reemplazarPagina(r.html); return; }
+            try { sessionStorage.removeItem('d2_sesion'); } catch (e) {}
+            return login();
+          })
+        : login();
+      p.catch(d2Falla);
+    }
+
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function() { try { navigator.serviceWorker.register('./sw.js'); } catch (e) {} });
+    }
+    d2Arrancar();
+  </script>
 </body>
 </html>
